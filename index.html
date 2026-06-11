@@ -1864,18 +1864,55 @@ async function ocrWithClaude(base64Img){
       },
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:60,
+        max_tokens:100,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64Img}},
-          {type:'text',text:'Find asset tag code starting with IS or ISNON followed by numbers (e.g. IS21101900002). Reply ONLY the code or NONE.'}
+          {type:'text',text:`Read the asset tag label in this image carefully.
+The code format is: IS followed by numbers (e.g. IS21101900002) OR ISNON followed by numbers (e.g. ISNON21102500041).
+Extract ONLY the exact code as printed. Reply with JUST the code, nothing else. If unclear, reply NONE.`}
         ]}]
       })
     });
     const data=await resp.json();
-    const text=(data.content?.[0]?.text||'').trim().toUpperCase();
-    const m=text.match(/IS(?:NON)?\d{8,}/);
-    return m?m[0]:null;
-  }catch(e){return null;}
+    const raw=(data.content?.[0]?.text||'').trim().toUpperCase().replace(/\s+/g,'').replace(/[^A-Z0-9]/g,'');
+    console.log('OCR raw:', raw);
+
+    // Try multiple patterns
+    let m = raw.match(/ISNON\d{8,}/);         // ISNON first (longer prefix)
+    if(!m) m = raw.match(/IS\d{8,}/);          // then IS
+    if(!m) m = raw.match(/IS[A-Z]*\d{8,}/);    // IS + any letters + numbers
+    if(m) return m[0];
+
+    // Fuzzy match against asset list
+    const fuzzy = assets.find(a=>{
+      const aid = a.id.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+      const r   = raw.replace(/[^A-Z0-9]/g,'');
+      return r.length >= 8 && (aid.includes(r) || r.includes(aid));
+    });
+    if(fuzzy){console.log('Fuzzy match:', fuzzy.id); return fuzzy.id;}
+    return null;
+  }catch(e){console.log('OCR error:',e.message); return null;}
+}
+
+// ── SMART MATCH: try partial code match ──────────────────
+function findAssetByPartialCode(rawCode){
+  const code = rawCode.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length < 6) return null;
+  // Exact
+  let a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')=== code);
+  if(a) return a;
+  // Starts with
+  a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'').startsWith(code));
+  if(a) return a;
+  // Code starts with asset id
+  a = assets.find(x=>code.startsWith(x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')));
+  if(a) return a;
+  // Contains (minimum 10 chars match)
+  if(code.length >= 10){
+    a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'').includes(code) ||
+                       code.includes(x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')));
+  }
+  return a || null;
 }
 
 // ── MANUAL INPUT ──────────────────────────────────────────
@@ -1906,10 +1943,15 @@ function doManualSearch(){
 
 // ── CORE HANDLER ──────────────────────────────────────────
 async function handleScannedCode(rawCode){
-  const code=rawCode.trim().toUpperCase();
-  let asset=assets.find(a=>a.id.toUpperCase()===code);
-  if(!asset) asset=assets.find(a=>a.id.toUpperCase().startsWith(code)||code.startsWith(a.id.toUpperCase()));
-  if(!asset) asset=assets.find(a=>a.id.toUpperCase().includes(code)||code.includes(a.id.toUpperCase()));
+  const code=rawCode.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  // Smart match
+  let asset = findAssetByPartialCode(code);
+  if(!asset){
+    // Direct id match with original raw
+    const rawUp = rawCode.trim().toUpperCase();
+    asset = assets.find(a=>a.id.toUpperCase()===rawUp);
+  }
+  console.log('handleScannedCode:', code, '->', asset?.id||'not found');
 
   const resultBox=document.getElementById('scan-result');
   const inner=document.getElementById('scan-result-inner');
