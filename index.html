@@ -163,20 +163,82 @@ input[type=checkbox]:disabled{cursor:default;opacity:.5}
   .scan-btn-icon{display:inline!important}
 }
 
+
+/* ===== MOBILE OVERHAUL ===== */
+@media(max-width:768px){
+
+  /* Hide stat card for ມູນຄ່າ on mobile to save space */
+  .stats-row{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .stat-card:last-child{grid-column:span 2}
+  .stat-num{font-size:22px!important}
+  .stat-label{font-size:11px!important}
+
+  /* TOOLBAR — clean 2-row layout */
+  .toolbar{padding:10px!important;gap:8px!important;flex-direction:column!important}
+  .toolbar > div:first-child{width:100%}
+  .toolbar > div:nth-child(2){width:100%}
+  .toolbar > div:last-child{width:100%;display:flex;justify-content:flex-end;gap:6px}
+  .tb-input{font-size:14px!important;padding:9px 10px!important;width:100%}
+  select.tb-input{width:100%}
+  .btn{padding:9px 14px!important;font-size:13px!important}
+
+  /* TABLE */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:12px!important;min-width:500px}
+  th{padding:8px 8px!important;font-size:11px!important}
+  td{padding:8px 8px!important;font-size:12px!important}
+  .table-info{flex-direction:column!important;gap:3px!important;padding:10px 12px!important;font-size:12px!important}
+
+  /* FINDING TAGS */
+  .finding-free-inp{font-size:12px!important;padding:4px 8px!important}
+
+  /* MODAL — full screen bottom sheet */
+  .modal-bg{padding:0!important;align-items:flex-end!important}
+  .modal{max-width:100%!important;width:100%!important;border-radius:16px 16px 0 0!important;max-height:92vh!important}
+  .form-control{font-size:16px!important}
+  .form-row,.form-row-3{grid-template-columns:1fr!important}
+
+  /* SCANNER MODAL — fullscreen */
+  #scanner-modal-bg{padding:0!important;align-items:stretch!important}
+  #scanner-modal-bg .modal{max-width:100%!important;width:100%!important;height:100vh!important;max-height:100vh!important;border-radius:0!important}
+  #scan-cam-wrap{aspect-ratio:unset!important;height:50vw!important;min-height:240px}
+
+  /* PRINT MODAL */
+  #print-modal-bg>div{border-radius:0!important}
+
+  /* IMPORT MODAL */
+  #import-modal-bg .modal{max-width:100%!important;border-radius:16px 16px 0 0!important}
+
+  /* SECTION TABS */
+  .section-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 8px!important}
+  .section-bar::-webkit-scrollbar{display:none}
+  .section-tab{white-space:nowrap;flex-shrink:0;padding:10px 14px!important;font-size:13px!important}
+
+  /* LOGIN */
+  .login-box{width:calc(100% - 24px)!important;padding:24px 20px!important}
+  .pin-btn{padding:14px!important;font-size:18px!important}
+}
+
+/* Landscape mobile */
+@media(max-width:768px) and (orientation:landscape){
+  #scan-cam-wrap{height:35vw!important;min-height:180px!important}
+}
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media(max-width:768px){
 
-  /* TOPBAR */
-  .topbar{padding:0 12px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;padding-top:8px;padding-bottom:8px}
-  .topbar-left{gap:6px;flex:1;min-width:0}
+  /* TOPBAR MOBILE */
+  .topbar{padding:8px 12px!important;height:auto!important;flex-direction:column;align-items:flex-start;gap:6px}
+  .topbar-left{width:100%;justify-content:space-between}
+  .topbar-right{width:100%;justify-content:space-between;flex-wrap:nowrap}
   .topbar-title{font-size:14px!important}
-  .topbar-sub{font-size:11px!important}
-  .topbar-right{gap:6px}
-  #topbar-counts{gap:4px!important;margin-left:0!important}
-  #topbar-counts>div{min-width:44px!important;padding:3px 6px!important}
-  #topbar-counts>div>div:first-child{font-size:14px!important}
+  .topbar-sub{font-size:10px!important;display:none}
+  #topbar-counts{gap:4px!important;margin-left:0!important;flex:1}
+  #topbar-counts>div{min-width:48px!important;padding:4px 6px!important;font-size:12px!important}
+  #topbar-counts>div>div:first-child{font-size:15px!important}
   #topbar-counts>div>div:last-child{font-size:9px!important}
-  .logout-btn{padding:5px 10px!important;font-size:12px!important}
+  .logout-btn{padding:6px 10px!important;font-size:12px!important}
+  .scan-btn-text{display:none!important}
 
   /* SECTION TABS — horizontal scroll */
   .section-bar{padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
@@ -258,12 +320,8 @@ input[type=checkbox]:disabled{cursor:default;opacity:.5}
   select.tb-input{min-height:40px}
 }
 </style>
-<!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <!-- SheetJS for Excel import -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<!-- Tesseract OCR for FA Tag text reading -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -355,8 +413,9 @@ input[type=checkbox]:disabled{cursor:default;opacity:.5}
           </select>
         </div>
         <div style="flex:1"></div>
-        <button class="btn btn-primary" id="btn-add" onclick="openAdd()" style="display:none">+ ເພີ່ມລາຍການ</button>
-        <label class="btn" style="cursor:pointer" title="Import Excel (.xls/.xlsx)">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;width:100%">
+        <button class="btn btn-primary" id="btn-add" onclick="openAdd()" style="display:none">+ ເພີ່ມ</button>
+        <label class="btn" style="cursor:pointer" title="Import Excel">
           📂 Import Excel
           <input type="file" id="import-excel-inp" accept=".xls,.xlsx" style="display:none" onchange="importExcel(this)">
         </label>
@@ -399,6 +458,272 @@ input[type=checkbox]:disabled{cursor:default;opacity:.5}
         <input id="new-dept-name" placeholder="ຊື່ພະແນກໃໝ່..." class="tb-input">
         <button class="btn btn-primary" onclick="addDept()">+ ເພີ່ມ</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-bg" id="import-modal-bg">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title" id="import-modal-title">📂 Import Excel</span>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div class="modal-body" id="import-modal-body" style="padding:20px"></div>
+    <div class="modal-footer" id="import-modal-footer"></div>
+  </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div class="modal-bg" id="print-modal-bg" onclick="if(event.target===this)closePrintModal()" style="z-index:600;padding:0">
+  <div style="background:#fff;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:#1a5fa8;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-size:16px;font-weight:700">🖨️ Preview ກ່ອນ Print</span>
+      <div style="display:flex;gap:10px">
+        <button onclick="doPrint()" style="padding:8px 20px;background:#fff;color:#1a5fa8;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🖨️ Print / Save PDF</button>
+        <button onclick="closePrintModal()" style="padding:8px 16px;background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:8px;font-size:14px;cursor:pointer">✕ ປິດ</button>
+      </div>
+    </div>
+    <iframe id="print-frame" style="flex:1;width:100%;border:none"></iframe>
+  </div>
+</div>
+
+<!-- SCANNER MODAL -->
+<div class="modal-bg" id="scanner-modal-bg" onclick="bgCloseScan(event)">
+  <div class="modal" style="max-width:460px;border-radius:16px">
+    <div class="modal-header" style="background:#1a5fa8;color:#fff;border-radius:16px 16px 0 0;padding:14px 18px">
+      <span class="modal-title" style="color:#fff;font-size:16px">📷 ສະແກນ FA Tag</span>
+      <button class="modal-close" onclick="closeScanner()" style="color:#fff;opacity:.8;font-size:22px">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px">
+
+      <!-- Mode tabs — only 2 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <button id="scan-tab-photo" onclick="setScanMode('photo')"
+          style="padding:12px 8px;border-radius:10px;border:1.5px solid #1a5fa8;background:#1a5fa8;color:#fff;cursor:pointer;font-size:14px;font-weight:700">
+          📸 ຖ່າຍ/ອັບໂຫຼດຮູບ
+        </button>
+        <button id="scan-tab-manual" onclick="setScanMode('manual')"
+          style="padding:12px 8px;border-radius:10px;border:1.5px solid #e2e5ef;background:#fff;color:#6b7a99;cursor:pointer;font-size:14px">
+          ⌨️ ພິມລະຫັດ
+        </button>
+      </div>
+
+      <!-- ===== PHOTO VIEW ===== -->
+      <div id="scan-photo-wrap">
+        <!-- 2 big buttons: camera + gallery -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+
+          <!-- Capture from camera -->
+          <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:10px;padding:24px 12px;border:2.5px solid #1a5fa8;border-radius:14px;cursor:pointer;
+            background:linear-gradient(135deg,#f0f5ff,#e8eef8);color:#1a5fa8;font-size:14px;font-weight:700;
+            text-align:center;transition:all .2s;min-height:130px"
+            onmouseover="this.style.background='#dce8fb'" onmouseout="this.style.background='linear-gradient(135deg,#f0f5ff,#e8eef8)'">
+            <span style="font-size:40px">📷</span>
+            ຖ່າຍຮູບ<br>FA Tag
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="scanPhoto(this)">
+          </label>
+
+          <!-- Upload from gallery -->
+          <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:10px;padding:24px 12px;border:2.5px solid #e2e5ef;border-radius:14px;cursor:pointer;
+            background:#f8faff;color:#6b7a99;font-size:14px;font-weight:700;
+            text-align:center;transition:all .2s;min-height:130px"
+            onmouseover="this.style.borderColor='#1a5fa8';this.style.color='#1a5fa8'" 
+            onmouseout="this.style.borderColor='#e2e5ef';this.style.color='#6b7a99'">
+            <span style="font-size:40px">🖼️</span>
+            ເລືອກຮູບ<br>ຈາກ Gallery
+            <input type="file" accept="image/*" style="display:none" onchange="scanPhoto(this)">
+          </label>
+        </div>
+
+        <!-- Tips -->
+        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px 12px;font-size:12px;color:#7a5c00;margin-bottom:10px">
+          💡 <b>Tips:</b> ຖ່າຍໃຫ້ tag ຊັດ · ແສງດີ · ບໍ່ສັ່ນ · ໃກ້ tag ໜ້ອຍ
+        </div>
+
+        <!-- Result area for photo -->
+        <div id="scan-photo-result" style="min-height:40px"></div>
+        <canvas id="scan-canvas" style="display:none"></canvas>
+      </div>
+
+      <!-- ===== MANUAL INPUT VIEW ===== -->
+      <div id="scan-manual-wrap" style="display:none">
+        <div style="margin-bottom:10px">
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600">
+            ພິມ ຫຼື ສະແກນ barcode ລະຫັດ FA Tag
+          </label>
+          <div style="display:flex;gap:8px">
+            <input id="scan-manual-inp" class="form-control"
+              placeholder="IS21101900002..."
+              oninput="scanManualLive(this.value)"
+              onkeydown="if(event.key==='Enter')doManualSearch()"
+              style="font-size:15px;text-transform:uppercase;letter-spacing:1px"
+              autocomplete="off" autocorrect="off" spellcheck="false">
+            <button onclick="doManualSearch()" class="btn btn-primary"
+              style="white-space:nowrap;padding:10px 16px;font-size:14px;font-weight:700">ຊອກ</button>
+          </div>
+        </div>
+        <div id="scan-manual-suggest" style="max-height:240px;overflow-y:auto"></div>
+      </div>
+
+      <!-- ===== RESULT ===== -->
+      <div id="scan-result" style="margin-top:12px;display:none">
+        <div id="scan-result-inner"></div>
+      </div>
+
+      <!-- ===== HISTORY ===== -->
+      <div id="scan-history-wrap" style="margin-top:12px;display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;
+          display:flex;align-items:center;justify-content:space-between">
+          <span>📋 ປະຫວັດການສະແກນ</span>
+          <button onclick="scanHistory=[];updateScanHistory()"
+            style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer">
+            ລ້າງ
+          </button>
+        </div>
+        <div id="scan-history-list" style="max-height:140px;overflow-y:auto"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-bg" id="import-modal-bg">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title" id="import-modal-title">📂 Import Excel</span>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div class="modal-body" id="import-modal-body" style="padding:20px"></div>
+    <div class="modal-footer" id="import-modal-footer"></div>
+  </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div class="modal-bg" id="print-modal-bg" onclick="if(event.target===this)closePrintModal()" style="z-index:600;padding:0">
+  <div style="background:#fff;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:#1a5fa8;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-size:16px;font-weight:700">🖨️ Preview ກ່ອນ Print</span>
+      <div style="display:flex;gap:10px">
+        <button onclick="doPrint()" style="padding:8px 20px;background:#fff;color:#1a5fa8;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🖨️ Print / Save PDF</button>
+        <button onclick="closePrintModal()" style="padding:8px 16px;background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:8px;font-size:14px;cursor:pointer">✕ ປິດ</button>
+      </div>
+    </div>
+    <iframe id="print-frame" style="flex:1;width:100%;border:none"></iframe>
+  </div>
+</div>
+
+<!-- SCANNER MODAL -->
+<div class="modal-bg" id="scanner-modal-bg" onclick="bgCloseScan(event)">
+  <div class="modal" style="max-width:500px;border-radius:16px">
+    <div class="modal-header" style="background:#1a5fa8;color:#fff;border-radius:16px 16px 0 0;padding:14px 18px">
+      <span class="modal-title" style="color:#fff;font-size:16px">📷 ສະແກນ FA Tag</span>
+      <button class="modal-close" onclick="closeScanner()" style="color:#fff;opacity:.8;font-size:22px">✕</button>
+    </div>
+    <div class="modal-body" style="padding:14px">
+
+      <!-- Mode tabs -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">
+        <button id="scan-tab-cam" onclick="setScanMode('cam')"
+          style="padding:10px 6px;border-radius:8px;border:1.5px solid #1a5fa8;background:#1a5fa8;color:#fff;cursor:pointer;font-size:13px;font-weight:600">
+          📹 ກ້ອງ Live
+        </button>
+        <button id="scan-tab-photo" onclick="setScanMode('photo')"
+          style="padding:10px 6px;border-radius:8px;border:1.5px solid #e2e5ef;background:#fff;color:#6b7a99;cursor:pointer;font-size:13px">
+          📸 ຖ່າຍຮູບ
+        </button>
+        <button id="scan-tab-manual" onclick="setScanMode('manual')"
+          style="padding:10px 6px;border-radius:8px;border:1.5px solid #e2e5ef;background:#fff;color:#6b7a99;cursor:pointer;font-size:13px">
+          ⌨️ ພິມລະຫັດ
+        </button>
+      </div>
+
+      <!-- ===== CAMERA VIEW ===== -->
+      <div id="scan-cam-wrap" style="display:flex;flex-direction:column;gap:10px">
+        <div style="position:relative;background:#000;border-radius:12px;overflow:hidden;width:100%;aspect-ratio:4/3">
+          <video id="scan-video" style="width:100%;height:100%;object-fit:cover" autoplay muted playsinline></video>
+          <!-- aim box -->
+          <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center">
+            <div style="width:75%;height:35%;border:3px solid #f5c518;border-radius:10px;
+              box-shadow:0 0 0 2000px rgba(0,0,0,.4)"></div>
+          </div>
+          <div id="scan-cam-status" style="position:absolute;bottom:0;left:0;right:0;
+            text-align:center;color:#fff;font-size:13px;background:rgba(0,0,0,.6);padding:8px;font-weight:500">
+            ກຳລັງໂຫຼດກ້ອງ...
+          </div>
+        </div>
+        <!-- CAPTURE BUTTON -->
+        
+        <div id="cam-ocr-status" style="display:none;text-align:center;padding:10px;
+          background:#f0f5ff;border-radius:8px;font-size:13px;color:#1a5fa8">
+          🔍 Claude Vision ກຳລັງອ່ານ FA Tag...
+        </div>
+      </div>
+
+      <!-- ===== PHOTO UPLOAD VIEW ===== -->
+      <div id="scan-photo-wrap" style="display:none">
+        <!-- Mobile: camera button + upload -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:8px;padding:20px 10px;border:2px dashed #1a5fa8;border-radius:12px;cursor:pointer;
+            background:#f0f5ff;color:#1a5fa8;font-size:13px;font-weight:600;text-align:center">
+            <span style="font-size:32px">📷</span>
+            ຖ່າຍຮູບ FA Tag
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="scanPhoto(this)">
+          </label>
+          <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:8px;padding:20px 10px;border:2px dashed #e2e5ef;border-radius:12px;cursor:pointer;
+            background:#f8faff;color:#6b7a99;font-size:13px;font-weight:600;text-align:center">
+            <span style="font-size:32px">🖼️</span>
+            ເລືອກຮູບ
+            <input type="file" accept="image/*" style="display:none" onchange="scanPhoto(this)">
+          </label>
+        </div>
+        <div id="scan-photo-result" style="min-height:80px"></div>
+        <canvas id="scan-canvas" style="display:none"></canvas>
+      </div>
+
+      <!-- ===== MANUAL INPUT VIEW ===== -->
+      <div id="scan-manual-wrap" style="display:none">
+        <div style="margin-bottom:8px">
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600">
+            ພິມ ຫຼື ສະແກນ barcode ລະຫັດ FA Tag
+          </label>
+          <div style="display:flex;gap:8px">
+            <input id="scan-manual-inp" class="form-control"
+              placeholder="IS21101900002..."
+              oninput="scanManualLive(this.value)"
+              onkeydown="if(event.key==='Enter')doManualSearch()"
+              style="font-size:15px;text-transform:uppercase;letter-spacing:1px"
+              autocomplete="off" autocorrect="off" spellcheck="false">
+            <button onclick="doManualSearch()" class="btn btn-primary"
+              style="white-space:nowrap;padding:10px 16px;font-size:14px">ຊອກ</button>
+          </div>
+        </div>
+        <div id="scan-manual-suggest" style="max-height:220px;overflow-y:auto"></div>
+      </div>
+
+      <!-- ===== RESULT ===== -->
+      <div id="scan-result" style="margin-top:12px;display:none">
+        <div id="scan-result-inner"></div>
+      </div>
+
+      <!-- ===== HISTORY ===== -->
+      <div id="scan-history-wrap" style="margin-top:12px;display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;
+          display:flex;align-items:center;justify-content:space-between">
+          <span>ປະຫວັດການສະແກນ</span>
+          <button onclick="scanHistory=[];updateScanHistory()"
+            style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--muted)">
+            ລ້າງ
+          </button>
+        </div>
+        <div id="scan-history-list" style="max-height:140px;overflow-y:auto"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -817,7 +1142,7 @@ function renderTable(){
 
 function toggleCheck(id,deptId,val){
   const a=assets.find(x=>x.id===id);
-  if(a){a.checks[String(deptId)]=val; renderStats();}
+  if(a){a.checks[String(deptId)]=val; renderStats(); saveAllAudit();}
 }
 function setFinding(id,val){
   const a=assets.find(x=>x.id===id);
@@ -825,6 +1150,7 @@ function setFinding(id,val){
   a.findings={};
   if(val)a.findings[val]=true;
   renderStats();renderTable();renderFindings();
+  saveAllAudit();
 }
 function setCustomFinding(id,val){
   const a=assets.find(x=>x.id===id);
@@ -832,7 +1158,7 @@ function setCustomFinding(id,val){
 }
 function setRemark(id,fk,val){
   const a=assets.find(x=>x.id===id);
-  if(a&&fk)a.remarks[fk]=val;
+  if(a&&fk){a.remarks[fk]=val; saveAllAudit();}
 }
 
 // ===== FINDINGS =====
@@ -1307,247 +1633,33 @@ function exportByCategory(){
 }
 
 // ============================================================
-// SUPABASE REALTIME SYNC
 // ============================================================
-const SUPA_URL = 'https://oznqqdtqpwuwohcbrlen.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96bnFxZHRxcHd1d29oY2JybGVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNTk3OTksImV4cCI6MjA5NjczNTc5OX0.79OxeGjzMo7p6K-wiyc0w7CxsFc9nF5xpjDzb9Jv1_I';
-let supabase_client = null;
-let realtimeChannel = null;
-
-async function initSupabase(){
-  try {
-    supabase_client = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
-    // Load assets from Supabase
-    await loadAssetsFromDB();
-
-    // Subscribe to realtime audit_status changes
-    realtimeChannel = supabase_client
-      .channel('audit_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'audit_status'
-      }, (payload) => {
-        handleRealtimeUpdate(payload);
-      })
-      .subscribe((status) => {
-        const dot = document.getElementById('sync-dot');
-        if(dot) dot.style.background = status==='SUBSCRIBED' ? '#1a8a4a' : '#e67e22';
-      });
-
-    showToast('✅ ເຊື່ອມຕໍ່ Supabase ສຳເລັດ — Realtime ເປີດໃຊ້ງານ');
-  } catch(e) {
-    console.error('Supabase init error:', e);
-    showToast('⚠️ ໃຊ້ຂໍ້ມູນ offline (Supabase ເຊື່ອມຕໍ່ບໍ່ໄດ້)');
-  }
-}
-
-async function loadAssetsFromDB() {
-  try {
-    // Load assets
-    const { data: dbAssets, error: aErr } = await supabase_client
-      .from('assets')
-      .select('*')
-      .order('id');
-    if(aErr) throw aErr;
-
-    // Load audit status
-    const { data: dbAudit, error: auErr } = await supabase_client
-      .from('audit_status')
-      .select('*');
-    if(auErr) throw auErr;
-
-    // Load departments
-    const { data: dbDepts, error: dErr } = await supabase_client
-      .from('departments')
-      .select('*')
-      .order('id');
-    if(dErr) throw dErr;
-
-    if(dbAssets && dbAssets.length > 0) {
-      // Map DB assets to app format
-      const auditMap = {};
-      (dbAudit||[]).forEach(a => auditMap[a.asset_id] = a);
-
-      assets = dbAssets.map(a => {
-        const aud = auditMap[a.id] || {};
-        return {
-          id: a.id,
-          name: a.name || '',
-          short: a.short_name || '',
-          category: a.category || '',
-          date: a.asset_date || '',
-          currency: a.currency || 'LAK',
-          price: a.price || 0,
-          rate: a.rate || 1,
-          valueKip: a.value_kip || 0,
-          floor: a.floor || '',
-          dept: a.dept_id || 0,
-          deptName: a.dept_name || '',
-          owner: a.owner || '',
-          section: a.section || 'is',
-          remark: a.remark || '',
-          img: '',
-          checks: {
-            bj: aud.check_bj || false,
-            kp: aud.check_kp || false,
-          },
-          findings: aud.finding ? {[aud.finding]: true} : {},
-          customFinding: aud.custom_finding || '',
-          remarks: {
-            worn: aud.remark_finding || '',
-            damaged: aud.remark_finding || '',
-            missing: aud.remark_finding || '',
-            custom: aud.remark_finding || '',
-          }
-        };
-      });
-
-      if(dbDepts && dbDepts.length > 0) {
-        departments = dbDepts.map(d => ({id: d.id, name: d.name}));
-      }
-
-      renderAll();
-      showToast(`📦 โหลดข้อมูล ${assets.length} ລາຍການຈາກ Supabase`);
-    }
-  } catch(e) {
-    console.error('Load error:', e);
-  }
-}
-
-function handleRealtimeUpdate(payload) {
-  const rec = payload.new || payload.old;
-  if(!rec || !rec.asset_id) return;
-
-  const asset = assets.find(a => a.id === rec.asset_id);
-  if(!asset) return;
-
-  if(payload.eventType !== 'DELETE') {
-    asset.checks.bj = rec.check_bj || false;
-    asset.checks.kp = rec.check_kp || false;
-    asset.findings  = rec.finding ? {[rec.finding]: true} : {};
-    asset.customFinding = rec.custom_finding || '';
-    const rmk = rec.remark_finding || '';
-    asset.remarks = {worn:rmk, damaged:rmk, missing:rmk, custom:rmk};
-  }
-
-  renderStats();
-  renderTable();
-  renderFindings();
-
-  // Flash notification
-  showToast(`🔄 ${rec.asset_id} ອັບເດດໂດຍຜູ້ໃຊ້ອື່ນ`);
-}
-
-// Override toggleCheck to save to Supabase
-const _origToggleCheck = toggleCheck;
-async function toggleCheck(id, deptId, val) {
-  _origToggleCheck(id, deptId, val);
-  await saveAuditStatus(id);
-}
-
-// Override setFinding to save to Supabase  
-const _origSetFinding = setFinding;
-async function setFinding(id, val) {
-  _origSetFinding(id, val);
-  await saveAuditStatus(id);
-}
-
-// Override setRemark to save to Supabase
-const _origSetRemark = setRemark;
-async function setRemark(id, fk, val) {
-  _origSetRemark(id, fk, val);
-  await saveAuditStatus(id);
-}
-
-async function saveAuditStatus(assetId) {
-  if(!supabase_client) return;
-  const a = assets.find(x => x.id === assetId);
-  if(!a) return;
-  const fVal = Object.keys(a.findings).find(k=>a.findings[k]) || '';
-  const rmk  = a.remarks[fVal] || a.remarks['custom'] || '';
-  try {
-    await supabase_client.from('audit_status').upsert({
-      asset_id: assetId,
-      check_bj: a.checks['bj'] || false,
-      check_kp: a.checks['kp'] || false,
-      finding: fVal,
-      custom_finding: a.customFinding || '',
-      remark_finding: rmk,
-      updated_at: new Date().toISOString(),
-      updated_by: currentRole
-    }, {onConflict: 'asset_id'});
-  } catch(e) {
-    console.error('Save error:', e);
-  }
-}
-
-// Sync indicator in topbar
-function addSyncIndicator() {
-  const tr = document.getElementById('role-disp');
-  if(!tr || document.getElementById('sync-dot')) return;
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.8)';
-  wrap.innerHTML = '<div id="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#e67e22;flex-shrink:0"></div><span>Sync</span>';
-  tr.parentNode.insertBefore(wrap, tr);
-}
-
-// init
-formSec='is';
-
+// SCANNER — Photo + Manual (Claude Vision OCR)
 // ============================================================
-// SCANNER — OCR-based FA Tag reader (Tesseract.js)
-// ============================================================
-let scanMode    = 'cam';
+let scanMode    = 'photo';
 let scanStream  = null;
-let ocrWorker   = null;
 let frameTimer  = null;
 let scanHistory = [];
 let isScanning  = false;
 
-// Pre-load Tesseract worker silently
-async function initOCR(){
-  if(ocrWorker) return;
-  try {
-    ocrWorker = await Tesseract.createWorker('eng', 1, {
-      logger: ()=>{},
-      errorHandler: ()=>{}
-    });
-    await ocrWorker.setParameters({
-      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      tessedit_pageseg_mode: '7',   // single line
-    });
-  } catch(e){ ocrWorker = null; }
-}
-// Init OCR as soon as page loads
-document.addEventListener('DOMContentLoaded', ()=> setTimeout(initOCR, 2000));
-
 function openScanner(){
   document.getElementById('scanner-modal-bg').classList.add('open');
-  setScanMode('cam');
-  initOCR();
+  setScanMode('photo');
 }
-// ============================================================
-// IMPORT EXCEL
-// ============================================================
-let importPreview = {is:[], nonis:[], unknown:[]};
 
 function importExcel(inp){
   const file = inp.files[0];
   if(!file){ return; }
-  inp.value = ''; // reset so same file can be re-imported
+  inp.value='';
 
   const body   = document.getElementById('import-modal-body');
   const footer = document.getElementById('import-modal-footer');
   const title  = document.getElementById('import-modal-title');
-
-  title.textContent = '📂 Import: ' + file.name;
-  body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted)">
-    <div style="font-size:32px">⏳</div>
-    <div style="margin-top:8px">ກຳລັງອ່ານໄຟລ໌...</div>
+  if(title) title.textContent = '📂 Import: ' + file.name;
+  if(body) body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted)">
+    <div style="font-size:32px">⏳</div><div style="margin-top:8px">ກຳລັງອ່ານໄຟລ໌...</div>
   </div>`;
-  footer.innerHTML = '';
+  if(footer) footer.innerHTML='';
   document.getElementById('import-modal-bg').classList.add('open');
 
   const reader = new FileReader();
@@ -1555,600 +1667,545 @@ function importExcel(inp){
     try {
       const data = new Uint8Array(e.target.result);
       let wb;
-      // Try XLSX first, fallback to HTML table parsing
-      try {
-        wb = XLSX.read(data, {type:'array', cellDates:true});
-      } catch(err) {
-        // For .xls saved as HTML (like INSEE export)
+      try { wb = XLSX.read(data, {type:'array', cellDates:true}); }
+      catch(err) {
         const text = new TextDecoder('utf-8').decode(data);
         wb = XLSX.read(text, {type:'string'});
       }
-
       const VALID_CATS = new Set([
         'ຄອມພິວເຕີ້','ອຸປະກອນຄອມພິວເຕີ້ (ຮາດແວ)','ຈັກນັບເງິນ','ເຟີນິເຈີ້','ແອ','ຊອບແວ',
         'ອຸປະກອນ IT','ໂທລະສັບ','ເຟີນີເຈີ ແລະ ອຸປະກອນ','ເຄື່ອງໃຊ້ໄຟຟ້າ',
         'ກ້ອງວົງຈອນ','ອຸປະກອນຄວາມປອດໄພ','ໂທລະທັດ','ຍານພາຫະນະ','ອຸປະກອນອື່ນໆ',
       ]);
-
-      let allRows = {is:[], nonis:[], unknown:[]};
-
-      wb.SheetNames.forEach(sheetName => {
-        const ws   = wb.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-
-        // Find header row (contains ລະຫັດຊັບສິນ or similar)
-        let headerIdx = -1;
-        for(let i=0; i<Math.min(rows.length,10); i++){
-          const r = rows[i].map(c=>String(c||''));
-          if(r.some(c=>c.includes('ລະຫັດ')||c.includes('ຊື່ຊັບສິນ'))){
-            headerIdx = i; break;
-          }
+      let allRows={is:[],nonis:[]};
+      wb.SheetNames.forEach(sheetName=>{
+        const ws=wb.Sheets[sheetName];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        let headerIdx=-1;
+        for(let i=0;i<Math.min(rows.length,10);i++){
+          const r=rows[i].map(c=>String(c||''));
+          if(r.some(c=>c.includes('ລະຫັດ')||c.includes('ຊື່ຊັບສິນ'))){headerIdx=i;break;}
         }
-        if(headerIdx < 0) return;
-
-        const headers = rows[headerIdx].map(c=>String(c||'').trim());
-        const colIdx = (name) => headers.findIndex(h=>h.includes(name));
-
-        const iCat   = colIdx('ໝວດ');
-        const iCode  = colIdx('ລະຫັດ');
-        const iName  = colIdx('ຊື່ຊັບສິນ');
-        const iShort = colIdx('ຊື່ຫຍໍ້');
-        const iDate  = colIdx('ວັນທີ');
-        const iCur   = colIdx('ສະກຸນ');
-        const iPrice = colIdx('ລາຄາ');
-        const iRate  = colIdx('ອັດຕາ');
-        const iKip   = colIdx('ມູນຄ່າ');
-        const iFloor = colIdx('ຊັ້ນ');
-        const iDept  = colIdx('ພະແນກ');
-        const iOwner = colIdx('ເຈົ້າຂອງ');
-        const iRmk   = colIdx('ໝາຍເຫດ');
-
-        // Detect section from sheet name or file name
-        const sn = sheetName.toLowerCase() + ' ' + file.name.toLowerCase();
-        let defaultSec = sn.includes('nonis')||sn.includes('non_is')||sn.includes('non-is') ? 'nonis' : 'is';
-
-        for(let i=headerIdx+1; i<rows.length; i++){
-          const r   = rows[i];
-          const cat = String(r[iCat]||'').trim();
-          const id  = String(r[iCode]||'').trim();
-          const nm  = String(r[iName]||'').trim();
-          if(!cat || !id || !nm) continue;
-          if(!VALID_CATS.has(cat)) continue;
-
-          // Auto-detect section from asset ID prefix
-          let sec = defaultSec;
-          const idUp = id.toUpperCase();
-          if(idUp.startsWith('ISNON') || idUp.startsWith('IS_NON')) sec = 'nonis';
-          else if(idUp.startsWith('IS'))  sec = 'is';
-
-          const kip   = parseFloat(String(r[iKip]||'0').replace(/,/g,''))||0;
-          const price = parseFloat(String(r[iPrice]||'0').replace(/,/g,''))||0;
-          const rate  = parseFloat(String(r[iRate]||'1').replace(/,/g,''))||1;
-          let   dateV = '';
-          if(iDate>=0 && r[iDate]){
-            const dv = r[iDate];
-            if(dv instanceof Date) dateV = dv.toISOString().split('T')[0];
-            else { const s=String(dv).trim(); dateV=s; }
-          }
-
-          const deptName = String(r[iDept]||'').trim();
-          // Find or keep dept id
-          let deptId = 0;
-          const found = departments.find(d=>d.name===deptName);
-          if(found) deptId = found.id;
-          else if(deptName){
-            // Auto-add new dept
-            const newId = Math.max(...departments.map(d=>d.id),0)+1;
-            departments.push({id:newId, name:deptName});
-            deptId = newId;
-          }
-
-          const asset = {
-            id, name:nm,
-            short: iShort>=0 ? String(r[iShort]||'').trim() : '',
-            category: cat,
-            date: dateV,
-            currency: iCur>=0 ? String(r[iCur]||'LAK').trim() : 'LAK',
-            price, rate, valueKip: Math.round(kip||price),
-            floor: iFloor>=0 ? String(r[iFloor]||'').trim() : '',
-            dept: deptId, deptName,
-            owner: iOwner>=0 ? String(r[iOwner]||'').trim() : '',
-            section: sec,
-            remark: iRmk>=0 ? String(r[iRmk]||'').trim() : '',
-            img:'', checks:{}, findings:{}, remarks:{},
-          };
-
-          allRows[sec].push(asset);
+        if(headerIdx<0)return;
+        const headers=rows[headerIdx].map(c=>String(c||'').trim());
+        const colIdx=(name)=>headers.findIndex(h=>h.includes(name));
+        const iCat=colIdx('ໝວດ'),iCode=colIdx('ລະຫັດ'),iName=colIdx('ຊື່ຊັບສິນ');
+        const iShort=colIdx('ຊື່ຫຍໍ້'),iDate=colIdx('ວັນທີ'),iCur=colIdx('ສະກຸນ');
+        const iPrice=colIdx('ລາຄາ'),iRate=colIdx('ອັດຕາ'),iKip=colIdx('ມູນຄ່າ');
+        const iFloor=colIdx('ຊັ້ນ'),iDept=colIdx('ພະແນກ'),iOwner=colIdx('ເຈົ້າຂອງ'),iRmk=colIdx('ໝາຍເຫດ');
+        const sn=sheetName.toLowerCase()+' '+file.name.toLowerCase();
+        let defaultSec=sn.includes('nonis')||sn.includes('non_is')?'nonis':'is';
+        for(let i=headerIdx+1;i<rows.length;i++){
+          const r=rows[i];
+          const cat=String(r[iCat]||'').trim();
+          const id=String(r[iCode]||'').trim();
+          const nm=String(r[iName]||'').trim();
+          if(!cat||!id||!nm||!VALID_CATS.has(cat))continue;
+          const idUp=id.toUpperCase();
+          let sec=defaultSec;
+          if(idUp.startsWith('ISNON'))sec='nonis';
+          else if(idUp.startsWith('IS'))sec='is';
+          const kip=parseFloat(String(r[iKip]||'0').replace(/,/g,''))||0;
+          const price=parseFloat(String(r[iPrice]||'0').replace(/,/g,''))||0;
+          const rate=parseFloat(String(r[iRate]||'1').replace(/,/g,''))||1;
+          let dateV='';
+          if(iDate>=0&&r[iDate]){const dv=r[iDate];dateV=dv instanceof Date?dv.toISOString().split('T')[0]:String(dv).trim();}
+          const deptName=String(r[iDept]||'').trim();
+          let deptId=0;
+          const found=departments.find(d=>d.name===deptName);
+          if(found)deptId=found.id;
+          else if(deptName){const nId=Math.max(...departments.map(d=>d.id),0)+1;departments.push({id:nId,name:deptName});deptId=nId;}
+          allRows[sec].push({id,name:nm,short:iShort>=0?String(r[iShort]||'').trim():'',
+            category:cat,date:dateV,currency:iCur>=0?String(r[iCur]||'LAK').trim():'LAK',
+            price,rate,valueKip:Math.round(kip||price),
+            floor:iFloor>=0?String(r[iFloor]||'').trim():'',
+            dept:deptId,deptName,owner:iOwner>=0?String(r[iOwner]||'').trim():'',
+            section:sec,remark:iRmk>=0?String(r[iRmk]||'').trim():'',
+            img:'',checks:{},findings:{},remarks:{}});
         }
       });
-
-      importPreview = allRows;
+      importPreview=allRows;
       showImportPreview(file.name);
-
-    } catch(err) {
-      body.innerHTML = `<div style="color:var(--danger);padding:16px">
-        ❌ ອ່ານໄຟລ໌ບໍ່ໄດ້: ${err.message}
-      </div>`;
-      footer.innerHTML = `<button class="btn" onclick="closeImportModal()">ປິດ</button>`;
+    } catch(err){
+      if(body) body.innerHTML=`<div style="color:var(--danger);padding:16px">❌ ອ່ານໄຟລ໌ບໍ່ໄດ້: ${err.message}</div>`;
+      if(footer) footer.innerHTML=`<button class="btn" onclick="closeImportModal()">ປິດ</button>`;
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
+let importPreview={is:[],nonis:[],unknown:[]};
+
 function showImportPreview(fname){
-  const body   = document.getElementById('import-modal-body');
-  const footer = document.getElementById('import-modal-footer');
-  const {is, nonis, unknown} = importPreview;
-  const total = is.length + nonis.length;
-
-  // Count new vs update
-  const existIds = new Set(assets.map(a=>a.id));
-  const isNew  = is.filter(a=>!existIds.has(a.id)).length;
-  const isUpd  = is.filter(a=>existIds.has(a.id)).length;
-  const niNew  = nonis.filter(a=>!existIds.has(a.id)).length;
-  const niUpd  = nonis.filter(a=>existIds.has(a.id)).length;
-
-  body.innerHTML = `
-    <div style="margin-bottom:14px">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">ໄຟລ໌: <b>${fname}</b></div>
-
-      <!-- IS -->
-      <div style="border:1.5px solid #dce8fb;border-radius:10px;overflow:hidden;margin-bottom:10px">
-        <div style="background:#1a5fa8;color:#fff;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center">
-          <span>🏢 IS Section</span>
-          <span style="font-size:22px;font-weight:700">${is.length} ລາຍການ</span>
-        </div>
-        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
-          <div style="background:#e8f0fe;border-radius:6px;padding:8px;text-align:center">
-            <div style="font-size:20px;font-weight:700;color:#1a5fa8">${isNew}</div>
-            <div style="font-size:11px;color:var(--muted)">ລາຍການໃໝ່</div>
-          </div>
-          <div style="background:#fff3cd;border-radius:6px;padding:8px;text-align:center">
-            <div style="font-size:20px;font-weight:700;color:#856404">${isUpd}</div>
-            <div style="font-size:11px;color:var(--muted)">ອັບເດດຂໍ້ມູນ</div>
-          </div>
-        </div>
+  const body=document.getElementById('import-modal-body');
+  const footer=document.getElementById('import-modal-footer');
+  const {is,nonis}=importPreview;
+  const total=is.length+nonis.length;
+  const existIds=new Set(assets.map(a=>a.id));
+  if(body) body.innerHTML=`
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px">ໄຟລ໌: <b>${fname}</b></div>
+    <div style="border:1.5px solid #dce8fb;border-radius:10px;overflow:hidden;margin-bottom:10px">
+      <div style="background:#1a5fa8;color:#fff;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between">
+        <span>🏢 IS Section</span><span style="font-size:20px">${is.length}</span>
       </div>
-
-      <!-- NonIS -->
-      <div style="border:1.5px solid #fde8d3;border-radius:10px;overflow:hidden;margin-bottom:${unknown.length?'10px':'0'}">
-        <div style="background:#e67e22;color:#fff;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center">
-          <span>📦 Non-IS Section</span>
-          <span style="font-size:22px;font-weight:700">${nonis.length} ລາຍການ</span>
-        </div>
-        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
-          <div style="background:#fde8d3;border-radius:6px;padding:8px;text-align:center">
-            <div style="font-size:20px;font-weight:700;color:#e67e22">${niNew}</div>
-            <div style="font-size:11px;color:var(--muted)">ລາຍການໃໝ່</div>
-          </div>
-          <div style="background:#fff3cd;border-radius:6px;padding:8px;text-align:center">
-            <div style="font-size:20px;font-weight:700;color:#856404">${niUpd}</div>
-            <div style="font-size:11px;color:var(--muted)">ອັບເດດຂໍ້ມູນ</div>
-          </div>
-        </div>
-      </div>
-
-      ${unknown.length ? `<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:12px;color:#7a5c00">
-        ⚠️ ${unknown.length} ລາຍການ detect section ບໍ່ໄດ້ (ຈະບໍ່ import)
-      </div>` : ''}
     </div>
-
-    <div style="background:#f8faff;border-radius:8px;padding:10px;font-size:12px;color:var(--muted)">
-      💡 ຂໍ້ມູນ <b>checks / findings / remarks</b> ທີ່ tick ໄວ້ຈະ <b>ຄົງຢູ່</b> — ຈະ update ສະເພາະຂໍ້ມູນຊັບສິນ (ຊື່, ລາຄາ, ພະແນກ ແລະ ອື່ນໆ)
+    <div style="border:1.5px solid #fde8d3;border-radius:10px;overflow:hidden;margin-bottom:10px">
+      <div style="background:#e67e22;color:#fff;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between">
+        <span>📦 Non-IS Section</span><span style="font-size:20px">${nonis.length}</span>
+      </div>
     </div>`;
-
-  footer.innerHTML = `
+  if(footer) footer.innerHTML=`
     <button class="btn" onclick="closeImportModal()">ຍົກເລີກ</button>
-    ${total > 0 ? `
-    <button class="btn btn-primary" onclick="confirmImport()">
-      ✅ ຢືນຢັນ Import ${total} ລາຍການ
-    </button>` : ''}`;
+    ${total>0?`<button class="btn btn-primary" onclick="confirmImport()">✅ Import ${total} ລາຍການ</button>`:''}`;
 }
 
 function confirmImport(){
-  const {is: isRows, nonis: nonisRows} = importPreview;
-  const existMap = new Map(assets.map(a=>[a.id, a]));
-
-  let added=0, updated=0;
-  [...isRows, ...nonisRows].forEach(newA => {
+  const {is:isRows,nonis:nonisRows}=importPreview;
+  const existMap=new Map(assets.map(a=>[a.id,a]));
+  let added=0,updated=0;
+  [...isRows,...nonisRows].forEach(newA=>{
     if(existMap.has(newA.id)){
-      // Update info but KEEP audit data
-      const old = existMap.get(newA.id);
-      Object.assign(old, {
-        name:     newA.name,
-        short:    newA.short,
-        category: newA.category,
-        date:     newA.date,
-        currency: newA.currency,
-        price:    newA.price,
-        rate:     newA.rate,
-        valueKip: newA.valueKip,
-        floor:    newA.floor,
-        dept:     newA.dept,
-        deptName: newA.deptName,
-        owner:    newA.owner,
-        section:  newA.section,
-        remark:   newA.remark,
-        // checks / findings / remarks — NOT overwritten
-      });
+      const old=existMap.get(newA.id);
+      Object.assign(old,{name:newA.name,short:newA.short,category:newA.category,
+        date:newA.date,currency:newA.currency,price:newA.price,rate:newA.rate,
+        valueKip:newA.valueKip,floor:newA.floor,dept:newA.dept,deptName:newA.deptName,
+        owner:newA.owner,section:newA.section,remark:newA.remark});
       updated++;
-    } else {
-      assets.push(newA);
-      added++;
-    }
+    } else {assets.push(newA);added++;}
   });
-
-  closeImportModal();
-  renderAll();
-
-  // Show toast
-  showToast(`✅ Import ສຳເລັດ — ເພີ່ມໃໝ່ ${added} · ອັບເດດ ${updated} ລາຍການ`);
+  closeImportModal();renderAll();
+  showToast(`✅ Import ສຳເລັດ — ເພີ່ມ ${added} · ອັບເດດ ${updated}`);
 }
 
 function closeImportModal(){
   document.getElementById('import-modal-bg').classList.remove('open');
-  importPreview = {is:[], nonis:[], unknown:[]};
-}
-
-function showToast(msg){
-  let t = document.getElementById('toast-msg');
-  if(!t){
-    t = document.createElement('div');
-    t.id='toast-msg';
-    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a2233;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .4s';
-    document.body.appendChild(t);
-  }
-  t.textContent=msg; t.style.opacity='1';
-  setTimeout(()=>{ t.style.opacity='0'; }, 3500);
 }
 
 function closeScanner(){
   stopCamera();
   document.getElementById('scanner-modal-bg').classList.remove('open');
   document.getElementById('scan-result').style.display='none';
-  isScanning = false;
+  isScanning=false;
 }
 function bgCloseScan(e){
   if(e.target===document.getElementById('scanner-modal-bg')) closeScanner();
 }
+function stopCamera(){
+  if(frameTimer){clearInterval(frameTimer);frameTimer=null;}
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  isScanning=false;
+}
 
 function setScanMode(mode){
-  scanMode = mode;
-  stopCamera();
-  isScanning = false;
-  document.getElementById('scan-cam-wrap').style.display    = mode==='cam'    ? 'flex'  : 'none';
-  document.getElementById('scan-photo-wrap').style.display  = mode==='photo'  ? 'block' : 'none';
-  document.getElementById('scan-manual-wrap').style.display = mode==='manual' ? 'block' : 'none';
-  document.getElementById('scan-result').style.display      = 'none';
-  // style tabs
-  ['cam','photo','manual'].forEach(k=>{
-    const el = document.getElementById('scan-tab-'+k);
-    if(!el) return;
-    if(k===mode){
-      el.style.cssText='flex:1;padding:8px;border-radius:8px;border:1.5px solid #1a5fa8;background:#1a5fa8;color:#fff;cursor:pointer;font-size:13px;font-weight:600';
-    } else {
-      el.style.cssText='flex:1;padding:8px;border-radius:8px;border:1.5px solid #e2e5ef;background:#fff;color:#6b7a99;cursor:pointer;font-size:13px';
-    }
+  if(mode==='cam') mode='photo';
+  scanMode=mode; stopCamera(); isScanning=false;
+  const photoWrap  = document.getElementById('scan-photo-wrap');
+  const manualWrap = document.getElementById('scan-manual-wrap');
+  if(photoWrap)  photoWrap.style.display  = mode==='photo' ? 'block' : 'none';
+  if(manualWrap) manualWrap.style.display = mode==='manual'? 'block' : 'none';
+  const res = document.getElementById('scan-result');
+  if(res) res.style.display='none';
+  ['photo','manual'].forEach(k=>{
+    const el=document.getElementById('scan-tab-'+k); if(!el)return;
+    el.style.cssText = k===mode
+      ? 'padding:12px 8px;border-radius:10px;border:1.5px solid #1a5fa8;background:#1a5fa8;color:#fff;cursor:pointer;font-size:14px;font-weight:700'
+      : 'padding:12px 8px;border-radius:10px;border:1.5px solid #e2e5ef;background:#fff;color:#6b7a99;cursor:pointer;font-size:14px';
   });
-  if(mode==='cam') startCamera();
 }
 
-// ── CAMERA + OCR loop ──────────────────────────────────────
-async function startCamera(){
-  const video  = document.getElementById('scan-video');
-  const status = document.getElementById('scan-cam-status');
-  status.textContent = 'ກຳລັງໂຫຼດກ້ອງ...';
-  try {
-    scanStream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:'environment', width:{ideal:1280}, height:{ideal:720} }
-    });
-    video.srcObject = scanStream;
-    await video.play();
-    status.innerHTML = '🟢 ກ້ອງພ້ອມ &nbsp;|&nbsp; ຊີ້ FA Tag ໃສ່ກ່ອງ → ລໍຖ້າ 2 ວິ';
-    startOCRLoop(video, status);
-  } catch(e){
-    status.textContent = '❌ ບໍ່ສາມາດເປີດກ້ອງ: ' + e.message;
-  }
-}
-
-function startOCRLoop(video, status){
-  const canvas = document.createElement('canvas');
-  let lastCode = '';
-  let sameCount = 0;
-
-  frameTimer = setInterval(async ()=>{
-    if(isScanning || video.readyState < 2) return;
-    if(!video.videoWidth) return;
-
-    // Crop center region (where the FA tag label should be)
-    const vw = video.videoWidth, vh = video.videoHeight;
-    const cropW = Math.round(vw * 0.7);
-    const cropH = Math.round(vh * 0.35);
-    const cropX = Math.round((vw - cropW) / 2);
-    const cropY = Math.round((vh - cropH) / 2);
-
-    canvas.width  = cropW;
-    canvas.height = cropH;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-    // Pre-process: grayscale + contrast boost
-    const imgData = ctx.getImageData(0, 0, cropW, cropH);
-    const d = imgData.data;
-    for(let i=0; i<d.length; i+=4){
-      const gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-      const boosted = Math.min(255, Math.max(0, (gray - 128)*1.8 + 128));
-      d[i]=d[i+1]=d[i+2] = boosted;
-    }
-    ctx.putImageData(imgData, 0, 0);
-
-    isScanning = true;
-    status.innerHTML = '🔍 ກຳລັງ OCR...';
-    try {
-      let detectedCode = null;
-
-      if(ocrWorker){
-        const { data } = await ocrWorker.recognize(canvas);
-        const raw = (data.text || '').replace(/\s+/g,'').toUpperCase();
-        // Extract IS or ISNON code
-        const m = raw.match(/IS(?:NON)?\d{10,}/);
-        if(m) detectedCode = m[0];
-      }
-
-      if(detectedCode){
-        if(detectedCode === lastCode){
-          sameCount++;
-          status.innerHTML = `🔍 ພົບ: <b>${detectedCode}</b> (${sameCount}/2)...`;
-          if(sameCount >= 2){
-            clearInterval(frameTimer);
-            handleScannedCode(detectedCode);
-            return;
-          }
-        } else {
-          lastCode  = detectedCode;
-          sameCount = 1;
-          status.innerHTML = `🔍 ພົບ: <b>${detectedCode}</b> — ລໍຖ້າຢືນຢັນ...`;
-        }
-      } else {
-        lastCode=''; sameCount=0;
-        status.innerHTML = '🟢 ຊີ້ FA Tag ໃສ່ກ່ອງ → ລໍຖ້າ OCR';
-      }
-    } catch(e){ /* ignore */ }
-    isScanning = false;
-  }, 1500);
-}
-
-function stopCamera(){
-  if(frameTimer){ clearInterval(frameTimer); frameTimer=null; }
-  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
-  isScanning = false;
-}
-
-// ── PHOTO UPLOAD + OCR ────────────────────────────────────
+// ── PHOTO SCAN ────────────────────────────────────────────
 async function scanPhoto(inp){
-  const file = inp.files[0]; if(!file) return;
-  const drop = document.getElementById('scan-photo-drop');
-  drop.innerHTML = `<div style="font-size:13px;padding:16px;text-align:center">
-    <div style="font-size:28px">🔍</div>
-    <div style="margin-top:6px;color:var(--muted)">ກຳລັງ OCR ອ่ານ FA Tag code...</div>
-    <div style="margin-top:8px;background:#f0f4fb;border-radius:6px;height:6px;overflow:hidden">
-      <div id="ocr-prog-bar" style="height:100%;background:#1a5fa8;width:0%;transition:width .3s"></div>
-    </div>
+  const file=inp.files[0]; if(!file)return;
+  inp.value='';
+  const drop=document.getElementById('scan-photo-result');
+  if(!drop)return;
+  drop.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted)">
+    <div style="font-size:32px">🔍</div>
+    <div style="margin-top:8px;font-size:13px">Claude Vision ກຳລັງອ່ານ FA Tag...</div>
   </div>`;
 
-  await initOCR();
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const base64=e.target.result.split(',')[1];
+    drop.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;display:block;margin:0 auto 10px">
+      <div style="text-align:center;font-size:12px;color:var(--muted)">🔍 ກຳລັງວິເຄາະ...</div>`;
 
-  const img = new Image();
-  img.onload = async ()=>{
-    // Show preview
-    drop.innerHTML = `<img src="${img.src}" style="max-width:100%;max-height:200px;border-radius:8px;display:block;margin:0 auto 8px">
-      <div style="text-align:center;font-size:12px;color:var(--muted)">🔍 ກຳລັງ OCR...</div>`;
-
-    const canvas = document.createElement('canvas');
-    canvas.width=img.naturalWidth; canvas.height=img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img,0,0);
-
-    // Pre-process for better OCR
-    const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const d = imgData.data;
-    for(let i=0;i<d.length;i+=4){
-      const gray = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-      const boosted = Math.min(255,Math.max(0,(gray-128)*2+128));
-      d[i]=d[i+1]=d[i+2]=boosted;
-    }
-    ctx.putImageData(imgData,0,0);
-
-    let detectedCode = null;
-
-    if(ocrWorker){
-      try {
-        // Full image OCR
-        const { data } = await ocrWorker.recognize(canvas);
-        const raw = (data.text||'').replace(/\s+/g,'').toUpperCase();
-        console.log('OCR raw:', raw);
-        const m = raw.match(/IS(?:NON)?\d{8,}/);
-        if(m) detectedCode = m[0];
-
-        // If not found, try each word
-        if(!detectedCode){
-          const words = (data.text||'').split(/\s+/).map(w=>w.toUpperCase().replace(/[^A-Z0-9]/g,''));
-          for(const w of words){
-            const wm = w.match(/IS(?:NON)?\d{8,}/);
-            if(wm){ detectedCode = wm[0]; break; }
-          }
-        }
-      } catch(e){ console.log('OCR err',e); }
-    }
-
-    if(detectedCode){
-      handleScannedCode(detectedCode);
+    const code = await ocrWithClaude(base64);
+    if(code){
+      handleScannedCode(code);
     } else {
-      // Show manual input fallback
-      drop.innerHTML = `<img src="${img.src}" style="max-width:100%;max-height:160px;border-radius:8px;display:block;margin:0 auto 10px">
-        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:12px;color:#7a5c00;margin-bottom:10px">
-          ⚠️ OCR ອ่ານ code ບໍ່ໄດ້ — ຮູບອາດຈະໄม່ຊັດ ຫຼື ແສງໜ້ອຍ<br>
-          ກະລຸນາພິມລະຫັດທີ່ເຫັນໃນ FA Tag:
+      drop.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:140px;border-radius:8px;display:block;margin:0 auto 10px">
+        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:12px;color:#7a5c00;margin-bottom:8px">
+          ⚠️ ອ່ານ code ບໍ່ໄດ້ — ພິມລະຫັດ:
         </div>
         <div style="display:flex;gap:6px">
-          <input id="photo-code-inp" class="form-control" placeholder="IS24050300104..." style="font-size:13px;text-transform:uppercase"
-            oninput="this.value=this.value.toUpperCase()">
-          <button onclick="doPhotoManual()" class="btn btn-primary" style="white-space:nowrap">ຊອກຫາ</button>
+          <input id="photo-code-inp" class="form-control" placeholder="IS21101900002..."
+            style="font-size:14px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          <button onclick="doPhotoManual()" class="btn btn-primary" style="white-space:nowrap">ຊອກ</button>
         </div>`;
     }
   };
-  img.src = URL.createObjectURL(file);
+  reader.readAsDataURL(file);
+}
+function doPhotoManual(){
+  const v=(document.getElementById('photo-code-inp')?.value||'').trim().toUpperCase();
+  if(v) handleScannedCode(v);
 }
 
-function doPhotoManual(){
-  const v = (document.getElementById('photo-code-inp').value||'').trim().toUpperCase();
-  if(v) handleScannedCode(v);
+// ── CLAUDE VISION OCR ─────────────────────────────────────
+async function ocrWithClaude(base64Img){
+  try {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:60,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64Img}},
+          {type:'text',text:'Find asset tag code starting with IS or ISNON followed by numbers (e.g. IS21101900002). Reply ONLY the code or NONE.'}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    const text=(data.content?.[0]?.text||'').trim().toUpperCase();
+    const m=text.match(/IS(?:NON)?\d{8,}/);
+    return m?m[0]:null;
+  }catch(e){return null;}
 }
 
 // ── MANUAL INPUT ──────────────────────────────────────────
 function scanManualLive(val){
-  const q = val.trim().toUpperCase();
-  const box = document.getElementById('scan-manual-suggest');
-  if(q.length < 2){ box.innerHTML=''; return; }
-  const matches = assets.filter(a=>
-    a.id.toUpperCase().includes(q) ||
-    a.name.toUpperCase().includes(q) ||
+  const q=val.trim().toUpperCase();
+  const box=document.getElementById('scan-manual-suggest');
+  if(!box)return;
+  if(q.length<2){box.innerHTML='';return;}
+  const matches=assets.filter(a=>
+    a.id.toUpperCase().includes(q)||
+    a.name.toUpperCase().includes(q)||
     (a.short||'').toUpperCase().includes(q)
   ).slice(0,8);
-  if(!matches.length){
-    box.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px">ບໍ່ພົບລາຍການ</div>';
-    return;
-  }
-  box.innerHTML = matches.map(a=>`
+  if(!matches.length){box.innerHTML='<div style="padding:8px;color:var(--muted);font-size:13px">ບໍ່ພົບ</div>';return;}
+  box.innerHTML=matches.map(a=>`
     <div onclick="handleScannedCode('${a.id}')"
-      style="padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;font-size:13px;background:#fff"
+      style="padding:10px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:#fff"
       onmouseover="this.style.background='#f0f5ff'" onmouseout="this.style.background='#fff'">
-      <span style="font-weight:700;color:var(--primary);font-family:monospace">${a.id}</span>
-      <span style="color:var(--text);margin-left:8px">${a.name}</span>
-      <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${a.category} · ຊັ້ນ ${a.floor||'—'} · ${departments.find(d=>d.id===a.dept)?.name||a.deptName||'—'}</span>
+      <div style="font-weight:700;color:var(--primary);font-family:monospace">${a.id}</div>
+      <div style="font-size:13px">${a.name}</div>
+      <div style="font-size:11px;color:var(--muted)">${a.category} · ຊັ້ນ${a.floor||'—'} · ${departments.find(d=>d.id===a.dept)?.name||a.deptName||'—'}</div>
     </div>`).join('');
 }
-
 function doManualSearch(){
-  const v = (document.getElementById('scan-manual-inp').value||'').trim().toUpperCase();
+  const v=(document.getElementById('scan-manual-inp')?.value||'').trim().toUpperCase();
   if(v) handleScannedCode(v);
 }
 
-// ── CORE: handle detected code ────────────────────────────
-function handleScannedCode(rawCode){
-  stopCamera();
-  isScanning = false;
-  const code = rawCode.trim().toUpperCase();
+// ── CORE HANDLER ──────────────────────────────────────────
+async function handleScannedCode(rawCode){
+  const code=rawCode.trim().toUpperCase();
+  let asset=assets.find(a=>a.id.toUpperCase()===code);
+  if(!asset) asset=assets.find(a=>a.id.toUpperCase().startsWith(code)||code.startsWith(a.id.toUpperCase()));
+  if(!asset) asset=assets.find(a=>a.id.toUpperCase().includes(code)||code.includes(a.id.toUpperCase()));
 
-  // Match: exact → startsWith → contains
-  let asset = assets.find(a=> a.id.toUpperCase() === code);
-  if(!asset) asset = assets.find(a=> a.id.toUpperCase().startsWith(code) || code.startsWith(a.id.toUpperCase()));
-  if(!asset) asset = assets.find(a=> a.id.toUpperCase().includes(code) || code.includes(a.id.toUpperCase()));
-
-  const resultBox = document.getElementById('scan-result');
-  const inner     = document.getElementById('scan-result-inner');
-  resultBox.style.display = 'block';
+  const resultBox=document.getElementById('scan-result');
+  const inner=document.getElementById('scan-result-inner');
+  if(resultBox) resultBox.style.display='block';
 
   if(asset){
-    // ✅ AUTO TICK ກວດສອບພາຍໃນ (kp)
-    asset.checks['kp'] = true;
-    renderStats(); renderTable(); renderFindings();
+    asset.checks['kp']=true;
+    saveAllAudit();
+    renderStats();renderTable();renderFindings();
 
-    const sec      = asset.section==='is' ? '🏢 IS' : '📦 Non-IS';
-    const deptName = departments.find(d=>d.id===asset.dept)?.name || asset.deptName || '—';
-
-    inner.innerHTML = `
-      <div style="background:#e8f8ee;border:1.5px solid #1a8a4a;border-radius:12px;padding:16px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <div style="font-size:36px;line-height:1">✅</div>
+    const dept=departments.find(d=>d.id===asset.dept)?.name||asset.deptName||'—';
+    if(inner) inner.innerHTML=`
+      <div style="background:#e8f8ee;border:2px solid #1a8a4a;border-radius:12px;padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:36px">✅</div>
           <div>
-            <div style="font-weight:700;font-size:15px;color:#145a32">ພົບຊັບສິນ! Tick ກວດສອບແລ້ວ</div>
-            <div style="font-size:11px;color:#1a8a4a;margin-top:1px">${sec} · ${new Date().toLocaleTimeString()}</div>
+            <div style="font-weight:700;font-size:15px;color:#145a32">ພົບຊັບສິນ! Tick ແລ້ວ</div>
+            <div style="font-size:11px;color:#1a8a4a">${asset.section==='is'?'🏢 IS':'📦 Non-IS'}</div>
           </div>
         </div>
         <div style="background:#fff;border-radius:8px;padding:10px;font-size:13px">
-          <div style="display:grid;grid-template-columns:80px 1fr;gap:4px 8px;align-items:start">
-            <span style="color:#6b7a99;font-size:12px">ລະຫັດ</span>
-            <span style="font-weight:700;font-family:monospace;color:#1a5fa8">${asset.id}</span>
-            <span style="color:#6b7a99;font-size:12px">ຊື່</span>
-            <span style="font-weight:600">${asset.name}</span>
-            <span style="color:#6b7a99;font-size:12px">ໝວດ</span>
-            <span>${asset.category}</span>
-            <span style="color:#6b7a99;font-size:12px">ຊັ້ນ</span>
-            <span>${asset.floor||'—'}</span>
-            <span style="color:#6b7a99;font-size:12px">ພະແນກ</span>
-            <span>${deptName}</span>
-            <span style="color:#6b7a99;font-size:12px">ເຈົ້າຂອງ</span>
-            <span>${asset.owner||'—'}</span>
+          <div style="display:grid;grid-template-columns:70px 1fr;gap:3px 8px">
+            <span style="color:#6b7a99;font-size:12px">ລະຫັດ</span><span style="font-weight:700;font-family:monospace;color:#1a5fa8">${asset.id}</span>
+            <span style="color:#6b7a99;font-size:12px">ຊື່</span><span style="font-weight:600">${asset.name}</span>
+            <span style="color:#6b7a99;font-size:12px">ໝວດ</span><span>${asset.category}</span>
+            <span style="color:#6b7a99;font-size:12px">ຊັ້ນ</span><span>${asset.floor||'—'}</span>
+            <span style="color:#6b7a99;font-size:12px">ພະແນກ</span><span>${dept}</span>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-          <button onclick="continueScan()" style="padding:10px;border-radius:8px;border:none;background:#1a8a4a;color:#fff;font-size:13px;cursor:pointer;font-weight:600">
-            📷 ສະແກນຕໍ່ໄປ
+          <button onclick="setScanMode('photo');document.getElementById('scan-result').style.display='none'"
+            style="padding:12px;border-radius:8px;border:none;background:#1a8a4a;color:#fff;font-size:14px;cursor:pointer;font-weight:600">
+            📷 ສະແກນຕໍ່
           </button>
-          <button onclick="closeScanner()" style="padding:10px;border-radius:8px;border:1.5px solid #1a8a4a;background:#fff;color:#1a8a4a;font-size:13px;cursor:pointer">
-            ✅ ສຳເລັດ / ປິດ
+          <button onclick="closeScanner()"
+            style="padding:12px;border-radius:8px;border:1.5px solid #1a8a4a;background:#fff;color:#1a8a4a;font-size:14px;cursor:pointer">
+            ✅ ສຳເລັດ
           </button>
         </div>
       </div>`;
 
-    // History
-    scanHistory.unshift({id:asset.id, name:asset.name, time:new Date().toLocaleTimeString()});
+    scanHistory.unshift({id:asset.id,name:asset.name,time:new Date().toLocaleTimeString()});
     updateScanHistory();
-
-    // Jump to asset section + highlight
-    currentSection = asset.section==='is' ? 'is' : 'nonis';
-    ['is','nonis','findings','depts'].forEach(x=>{
-      document.getElementById('stab-'+x).classList.toggle('active', x===currentSection);
-    });
+    currentSection=asset.section==='is'?'is':'nonis';
+    ['is','nonis','findings','depts'].forEach(x=>
+      document.getElementById('stab-'+x)?.classList.toggle('active',x===currentSection));
     document.getElementById('view-assets').style.display='block';
     document.getElementById('view-findings').style.display='none';
     document.getElementById('view-depts').style.display='none';
-    document.getElementById('stats-row').style.display='grid';
-    document.getElementById('search-q').value = asset.id;
+    document.getElementById('search-q').value=asset.id;
     renderTable();
-
   } else {
-    inner.innerHTML = `
-      <div style="background:#fdf2f2;border:1.5px solid #c0392b;border-radius:12px;padding:16px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    if(inner) inner.innerHTML=`
+      <div style="background:#fdf2f2;border:2px solid #c0392b;border-radius:12px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <div style="font-size:32px">❌</div>
           <div>
-            <div style="font-weight:700;color:#721c24;font-size:14px">ບໍ່ພົບລະຫັດ "${code}"</div>
-            <div style="font-size:11px;color:#c0392b;margin-top:2px">ກວດສອບລະຫັດ ຫຼື ລອງສະແກນໃໝ່</div>
+            <div style="font-weight:700;color:#721c24">ບໍ່ພົບ: "${code}"</div>
+            <div style="font-size:12px;color:#c0392b">ລອງໃໝ່ ຫຼື ພິມລະຫັດ</div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <button onclick="setScanMode('cam')" style="padding:9px;border-radius:8px;border:none;background:#c0392b;color:#fff;font-size:13px;cursor:pointer">
-            📷 ສະແກນໃໝ່
-          </button>
-          <button onclick="setScanMode('manual')" style="padding:9px;border-radius:8px;border:1.5px solid #c0392b;background:#fff;color:#c0392b;font-size:13px;cursor:pointer">
-            ⌨️ ພິມລະຫັດ
-          </button>
-        </div>
+        <button onclick="setScanMode('photo');document.getElementById('scan-result').style.display='none'"
+          style="width:100%;padding:10px;border-radius:8px;border:none;background:#c0392b;color:#fff;font-size:13px;cursor:pointer">
+          🔄 ສະແກນໃໝ່
+        </button>
       </div>`;
   }
 }
 
-function continueScan(){
-  document.getElementById('scan-result').style.display='none';
-  setScanMode(scanMode);
-}
-
 function updateScanHistory(){
-  const wrap = document.getElementById('scan-history-wrap');
-  const list = document.getElementById('scan-history-list');
-  if(!scanHistory.length){ wrap.style.display='none'; return; }
+  const wrap=document.getElementById('scan-history-wrap');
+  const list=document.getElementById('scan-history-list');
+  if(!scanHistory.length||!wrap){if(wrap)wrap.style.display='none';return;}
   wrap.style.display='block';
-  list.innerHTML = scanHistory.slice(0,15).map((h,i)=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:6px;background:${i===0?'#e8f8ee':'#f8faff'};margin-bottom:3px;font-size:12px;border:1px solid ${i===0?'#1a8a4a':'#e2e5ef'}">
-      <span>
-        <span style="font-weight:700;color:var(--primary);font-family:monospace">${h.id}</span>
-        <span style="color:var(--muted);margin-left:6px;font-size:11px">${h.name.substring(0,25)}${h.name.length>25?'...':''}</span>
-      </span>
-      <span style="color:var(--muted);font-size:11px;white-space:nowrap;margin-left:6px">${h.time}</span>
+  list.innerHTML=scanHistory.slice(0,10).map((h,i)=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;
+      background:${i===0?'#e8f8ee':'#f8faff'};margin-bottom:3px;font-size:12px">
+      <span><b style="color:var(--primary)">${h.id}</b> — ${h.name.slice(0,20)}</span>
+      <span style="color:var(--muted)">${h.time}</span>
     </div>`).join('');
 }
+
+// ── AUDIT EXPORT/IMPORT ──────────────────────────────────
+function exportAuditJSON(){
+  const data = {};
+  assets.forEach(a=>{
+    const fVal=Object.keys(a.findings).find(k=>a.findings[k])||'';
+    if(a.checks.bj||a.checks.kp||fVal||a.customFinding){
+      data[a.id]={
+        bj:a.checks.bj||false,
+        kp:a.checks.kp||false,
+        finding:fVal,
+        customFinding:a.customFinding||'',
+        remark:a.remarks[fVal]||a.remarks['custom']||''
+      };
+    }
+  });
+  const checked = Object.values(data).filter(d=>d.kp).length;
+  const findings = Object.values(data).filter(d=>d.finding).length;
+  const payload = {
+    exported_at: new Date().toISOString(),
+    exported_by: currentRole,
+    summary: {total_audited: Object.keys(data).length, checked_kp: checked, findings},
+    audit: data
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`FAR-Audit-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`💾 Export ${Object.keys(data).length} ລາຍການ audit ສຳເລັດ`);
+}
+
+function importAuditJSON(inp){
+  const file=inp.files[0]; if(!file)return;
+  inp.value='';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      const payload=JSON.parse(e.target.result);
+      const data=payload.audit||payload;
+      let count=0;
+      Object.entries(data).forEach(([id,d])=>{
+        const a=assets.find(x=>x.id===id); if(!a)return;
+        a.checks.bj=d.bj||false;
+        a.checks.kp=d.kp||false;
+        a.findings=d.finding?{[d.finding]:true}:{};
+        a.customFinding=d.customFinding||'';
+        const rmk=d.remark||'';
+        a.remarks={worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
+        count++;
+      });
+      saveAllAudit();
+      renderAll();
+      showToast(`✅ Import ${count} ລາຍການ audit ສຳເລັດ`);
+    } catch(e){
+      showToast('❌ ໄຟລ໌ JSON ບໍ່ຖືກຕ້ອງ');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── UTILITY ──────────────────────────────────────────────
+function showToast(msg, duration=3500){
+  let t = document.getElementById('toast-msg');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast-msg';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a2233;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .4s;max-width:90vw;text-align:center';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>{ t.style.opacity='0'; }, duration);
+}
+
+// ============================================================
+// BACKEND — Google Apps Script (no CORS issues)
+// ============================================================
+// Setup: create Google Apps Script Web App
+// that acts as a proxy to Google Sheets
+// 
+// For now: save audit status to localStorage (works offline)
+// and sync when multiple users share the same device/session
+// ============================================================
+
+const STORAGE_KEY = 'far_audit_data';
+
+// ── SAVE/LOAD audit to localStorage ──────────────────────
+function saveAllAudit(){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  if(dot){dot.style.background='#1a8a4a';}
+  if(lbl){lbl.textContent='✅';setTimeout(()=>{if(lbl)lbl.textContent='💾';},1500);}
+  const data = {};
+  assets.forEach(a=>{
+    const fVal = Object.keys(a.findings).find(k=>a.findings[k])||'';
+    if(a.checks.bj || a.checks.kp || fVal || a.customFinding){
+      data[a.id] = {
+        bj: a.checks.bj||false,
+        kp: a.checks.kp||false,
+        finding: fVal,
+        customFinding: a.customFinding||'',
+        remark: a.remarks[fVal]||a.remarks['custom']||''
+      };
+    }
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e){}
+}
+
+function loadAuditFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    let count = 0;
+    Object.entries(data).forEach(([id, d])=>{
+      const a = assets.find(x=>x.id===id);
+      if(!a) return;
+      a.checks.bj = d.bj||false;
+      a.checks.kp = d.kp||false;
+      a.findings  = d.finding ? {[d.finding]:true} : {};
+      a.customFinding = d.customFinding||'';
+      const rmk = d.remark||'';
+      a.remarks = {worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
+      count++;
+    });
+    if(count>0){
+      renderAll();
+      showToast(`📱 โหลด ${count} ລາຍການ audit ຈາກ device`);
+    }
+  } catch(e){}
+}
+
+// ── GOOGLE APPS SCRIPT SYNC (optional) ───────────────────
+// If user sets up Apps Script, enable cloud sync
+let GAS_URL = localStorage.getItem('gas_url')||'';
+
+async function syncToGAS(){
+  if(!GAS_URL) return;
+  const dot = document.getElementById('sync-dot');
+  try {
+    const data = {};
+    assets.forEach(a=>{
+      const fVal=Object.keys(a.findings).find(k=>a.findings[k])||'';
+      if(a.checks.bj||a.checks.kp||fVal){
+        data[a.id]={bj:a.checks.bj,kp:a.checks.kp,finding:fVal,
+          remark:a.remarks[fVal]||''};
+      }
+    });
+    const r = await fetch(GAS_URL+'?action=save', {
+      method:'POST', body:JSON.stringify(data)
+    });
+    if(r.ok && dot) dot.style.background='#1a8a4a';
+  } catch(e){
+    if(dot) dot.style.background='#e67e22';
+  }
+}
+
+async function syncFromGAS(){
+  if(!GAS_URL) return;
+  try {
+    const r = await fetch(GAS_URL+'?action=load');
+    if(!r.ok) return;
+    const data = await r.json();
+    Object.entries(data).forEach(([id,d])=>{
+      const a=assets.find(x=>x.id===id); if(!a) return;
+      a.checks.bj=d.bj||false; a.checks.kp=d.kp||false;
+      a.findings=d.finding?{[d.finding]:true}:{};
+      const rmk=d.remark||'';
+      a.remarks={worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
+    });
+    renderAll();
+    showToast('✅ Sync ຈາກ Cloud ສຳເລັດ');
+  } catch(e){}
+}
+
+// ── OVERRIDE AUDIT ACTIONS → save locally ────────────────
+// Audit save integrated directly into toggleCheck/setFinding/setRemark
+
+// ── INIT ─────────────────────────────────────────────────
+function initSupabase(){
+  addSyncIndicator();
+  loadAuditFromStorage();
+  if(GAS_URL) syncFromGAS();
+}
+
+function saveAuditStatus(){ saveAllAudit(); }
+
+// ── SYNC INDICATOR ────────────────────────────────────────
+function addSyncIndicator(){
+  const tr=document.getElementById('role-disp');
+  if(!tr||document.getElementById('sync-dot')) return;
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.85);cursor:pointer';
+  wrap.title='ຄລິກ setup Cloud Sync';
+  wrap.onclick=showSyncSetup;
+  wrap.innerHTML='<div id="sync-dot" style="width:9px;height:9px;border-radius:50%;background:#1a8a4a;flex-shrink:0"></div><span>Local</span>';
+  tr.parentNode.insertBefore(wrap,tr);
+}
+
+function showSyncSetup(){
+  const cur = localStorage.getItem('gas_url')||'';
+  const url = prompt('ໃສ່ Google Apps Script URL (ຫຼື ຫວ່າງ = offline only):', cur);
+  if(url !== null){
+    localStorage.setItem('gas_url', url.trim());
+    GAS_URL = url.trim();
+    showToast(GAS_URL ? '✅ Cloud sync ຕັ້ງຄ່າແລ້ວ' : '📱 ໃຊ້ offline mode');
+    if(GAS_URL) syncFromGAS();
+  }
+}
+
 </script>
 </body>
 </html>
