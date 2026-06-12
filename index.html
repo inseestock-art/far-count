@@ -320,6 +320,8 @@ input[type=checkbox]:disabled{cursor:default;opacity:.5}
   select.tb-input{min-height:40px}
 }
 </style>
+<!-- Tesseract OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <!-- SheetJS for Excel import -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -1142,7 +1144,7 @@ function renderTable(){
 
 function toggleCheck(id,deptId,val){
   const a=assets.find(x=>x.id===id);
-  if(a){a.checks[String(deptId)]=val; renderStats(); saveAllAudit();}
+  if(a){a.checks[String(deptId)]=val; renderStats(); saveAllAudit(); saveToFirebase(id);}
 }
 function setFinding(id,val){
   const a=assets.find(x=>x.id===id);
@@ -1151,6 +1153,7 @@ function setFinding(id,val){
   if(val)a.findings[val]=true;
   renderStats();renderTable();renderFindings();
   saveAllAudit();
+  saveToFirebase(id);
 }
 function setCustomFinding(id,val){
   const a=assets.find(x=>x.id===id);
@@ -1158,7 +1161,7 @@ function setCustomFinding(id,val){
 }
 function setRemark(id,fk,val){
   const a=assets.find(x=>x.id===id);
-  if(a&&fk){a.remarks[fk]=val; saveAllAudit();}
+  if(a&&fk){a.remarks[fk]=val; saveAllAudit(); saveToFirebase(id);}
 }
 
 // ===== FINDINGS =====
@@ -1821,99 +1824,120 @@ async function scanPhoto(inp){
   if(!drop)return;
   drop.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted)">
     <div style="font-size:32px">🔍</div>
-    <div style="margin-top:8px;font-size:13px">Claude Vision ກຳລັງອ່ານ FA Tag...</div>
+    <div style="margin-top:8px;font-size:13px">ກຳລັງວິເຄາະ FA Tag...</div>
   </div>`;
 
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const base64=e.target.result.split(',')[1];
-    drop.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;display:block;margin:0 auto 10px">
-      <div style="text-align:center;font-size:12px;color:var(--muted)">🔍 ກຳລັງວິເຄາະ...</div>`;
+  // Convert any image format → JPEG via canvas for consistency
+  const imgSrc = await new Promise(res=>{
+    const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(file);
+  });
 
-    const code = await ocrWithClaude(base64);
-    if(code){
-      handleScannedCode(code);
+  const base64Jpeg = await new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      // Scale down if too large (max 1600px)
+      let w=img.width, h=img.height;
+      if(w>1600){h=Math.round(h*1600/w);w=1600;}
+      c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',0.92).split(',')[1]);
+    };
+    img.src=imgSrc;
+  });
+
+  // Show preview
+  drop.innerHTML=`<img src="${imgSrc}" style="max-width:100%;max-height:180px;border-radius:8px;display:block;margin:0 auto 10px">
+    <div style="text-align:center;font-size:12px;color:var(--muted)">🔍 Claude Vision ກຳລັງອ່ານ...</div>`;
+
+  const code = await ocrWithClaude(base64Jpeg);
+
+  if(code){
+    // Verify code exists in system
+    const asset = findAssetByPartialCode(code);
+    if(asset){
+      drop.innerHTML=`<img src="${imgSrc}" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto 8px">`;
+      handleScannedCode(asset.id);
     } else {
-      drop.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:140px;border-radius:8px;display:block;margin:0 auto 10px">
-        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:12px;color:#7a5c00;margin-bottom:8px">
-          ⚠️ ອ່ານ code ບໍ່ໄດ້ — ພິມລະຫັດ:
+      // Code detected but not in system
+      drop.innerHTML=`<img src="${imgSrc}" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto 8px">
+        <div style="background:#fde8d3;border:1px solid #e67e22;border-radius:8px;padding:10px;font-size:13px;color:#7a3500;margin-bottom:8px">
+          📋 OCR ອ່ານໄດ້: <b>${code}</b><br>ແຕ່ບໍ່ພົບໃນລະບົບ — ກວດ Non-IS Section ນຳ
         </div>
         <div style="display:flex;gap:6px">
-          <input id="photo-code-inp" class="form-control" placeholder="IS21101900002..."
+          <input id="photo-code-inp" class="form-control" value="${code}"
             style="font-size:14px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
           <button onclick="doPhotoManual()" class="btn btn-primary" style="white-space:nowrap">ຊອກ</button>
         </div>`;
     }
-  };
-  reader.readAsDataURL(file);
+  } else {
+    drop.innerHTML=`<img src="${imgSrc}" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto 8px">
+      <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:12px;color:#7a5c00;margin-bottom:8px">
+        ⚠️ ອ່ານ code ບໍ່ໄດ້ — ພິມລະຫັດເອງ:
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="photo-code-inp" class="form-control" placeholder="ISNON21102500041..."
+          style="font-size:14px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        <button onclick="doPhotoManual()" class="btn btn-primary" style="white-space:nowrap">ຊອກ</button>
+      </div>`;
+  }
 }
 function doPhotoManual(){
   const v=(document.getElementById('photo-code-inp')?.value||'').trim().toUpperCase();
   if(v) handleScannedCode(v);
 }
 
-// ── CLAUDE VISION OCR ─────────────────────────────────────
+// ── OCR — Tesseract.js (browser, no API key needed) ──────
+let _tessWorker = null;
+
+async function initTesseract(){
+  if(_tessWorker) return _tessWorker;
+  try {
+    _tessWorker = await Tesseract.createWorker('eng', 1, {logger:m=>{}});
+    await _tessWorker.setParameters({
+      tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+      tessedit_pageseg_mode:'6',
+    });
+    console.log('Tesseract ready');
+    return _tessWorker;
+  } catch(e){ console.warn('Tesseract init:',e.message); _tessWorker=null; return null; }
+}
+
 async function ocrWithClaude(base64Img){
   try {
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:100,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64Img}},
-          {type:'text',text:`Read the asset tag label in this image carefully.
-The code format is: IS followed by numbers (e.g. IS21101900002) OR ISNON followed by numbers (e.g. ISNON21102500041).
-Extract ONLY the exact code as printed. Reply with JUST the code, nothing else. If unclear, reply NONE.`}
-        ]}]
-      })
-    });
-    const data=await resp.json();
-    const raw=(data.content?.[0]?.text||'').trim().toUpperCase().replace(/\s+/g,'').replace(/[^A-Z0-9]/g,'');
+    const worker = await initTesseract();
+    if(!worker){ console.warn('No Tesseract worker'); return null; }
+
+    // base64 → blob → URL
+    const bin = atob(base64Img);
+    const arr = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    const blobUrl = URL.createObjectURL(new Blob([arr],{type:'image/jpeg'}));
+
+    const {data} = await worker.recognize(blobUrl);
+    URL.revokeObjectURL(blobUrl);
+
+    // Clean and extract
+    const raw = (data.text||'').toUpperCase().replace(/\s+/g,'').replace(/[^A-Z0-9]/g,'');
     console.log('OCR raw:', raw);
 
-    // Try multiple patterns
-    let m = raw.match(/ISNON\d{8,}/);         // ISNON first (longer prefix)
-    if(!m) m = raw.match(/IS\d{8,}/);          // then IS
-    if(!m) m = raw.match(/IS[A-Z]*\d{8,}/);    // IS + any letters + numbers
-    if(m) return m[0];
+    // Match ISNON first (longer), then IS
+    let m = raw.match(/ISNON\d{8,}/);
+    if(!m) m = raw.match(/IS\d{8,}/);
+    if(m){ console.log('Found:', m[0]); return m[0]; }
 
-    // Fuzzy match against asset list
-    const fuzzy = assets.find(a=>{
+    // Fuzzy: match any asset ID found in raw text
+    for(const a of assets){
       const aid = a.id.replace(/[^A-Z0-9]/gi,'').toUpperCase();
-      const r   = raw.replace(/[^A-Z0-9]/g,'');
-      return r.length >= 8 && (aid.includes(r) || r.includes(aid));
-    });
-    if(fuzzy){console.log('Fuzzy match:', fuzzy.id); return fuzzy.id;}
+      if(aid.length >= 10 && raw.includes(aid)){ console.log('Fuzzy:', a.id); return a.id; }
+    }
     return null;
-  }catch(e){console.log('OCR error:',e.message); return null;}
+  } catch(e){ console.warn('OCR error:',e.message); return null; }
 }
 
-// ── SMART MATCH: try partial code match ──────────────────
-function findAssetByPartialCode(rawCode){
-  const code = rawCode.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(code.length < 6) return null;
-  // Exact
-  let a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')=== code);
-  if(a) return a;
-  // Starts with
-  a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'').startsWith(code));
-  if(a) return a;
-  // Code starts with asset id
-  a = assets.find(x=>code.startsWith(x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')));
-  if(a) return a;
-  // Contains (minimum 10 chars match)
-  if(code.length >= 10){
-    a = assets.find(x=>x.id.toUpperCase().replace(/[^A-Z0-9]/g,'').includes(code) ||
-                       code.includes(x.id.toUpperCase().replace(/[^A-Z0-9]/g,'')));
-  }
-  return a || null;
-}
+// Pre-warm Tesseract after page loads
+setTimeout(initTesseract, 2000);
+
 
 // ── MANUAL INPUT ──────────────────────────────────────────
 function scanManualLive(val){
@@ -1944,14 +1968,16 @@ function doManualSearch(){
 // ── CORE HANDLER ──────────────────────────────────────────
 async function handleScannedCode(rawCode){
   const code=rawCode.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  // Smart match
-  let asset = findAssetByPartialCode(code);
-  if(!asset){
-    // Direct id match with original raw
-    const rawUp = rawCode.trim().toUpperCase();
-    asset = assets.find(a=>a.id.toUpperCase()===rawUp);
+  const rawUp=rawCode.trim().toUpperCase();
+  // Search ALL sections
+  let asset = assets.find(a=>a.id.toUpperCase()===rawUp);
+  if(!asset) asset = assets.find(a=>a.id.toUpperCase().replace(/[^A-Z0-9]/g,'')=== code);
+  if(!asset) asset = findAssetByPartialCode(code);
+  console.log('Match:', rawUp, '->', asset?.id||'NOT FOUND', '| section:', asset?.section||'-');
+  // If found in nonis but currently viewing is — switch section
+  if(asset && asset.section !== currentSection && currentSection !== 'findings'){
+    currentSection = asset.section;
   }
-  console.log('handleScannedCode:', code, '->', asset?.id||'not found');
 
   const resultBox=document.getElementById('scan-result');
   const inner=document.getElementById('scan-result-inner');
@@ -2112,118 +2138,184 @@ function showToast(msg, duration=3500){
 }
 
 // ============================================================
-// BACKEND — Google Apps Script (no CORS issues)
+// BACKEND — Firebase Realtime Database
 // ============================================================
-// Setup: create Google Apps Script Web App
-// that acts as a proxy to Google Sheets
-// 
-// For now: save audit status to localStorage (works offline)
-// and sync when multiple users share the same device/session
-// ============================================================
+const FB_URL = 'https://far-count-default-rtdb.asia-southeast1.firebasedatabase.app';
+let fbPollTimer = null;
+let lastPollTime = Date.now();
+let isSyncing = false;
 
-const STORAGE_KEY = 'far_audit_data';
-
-// ── SAVE/LOAD audit to localStorage ──────────────────────
-function saveAllAudit(){
-  const dot=document.getElementById('sync-dot');
-  const lbl=document.getElementById('sync-label');
-  if(dot){dot.style.background='#1a8a4a';}
-  if(lbl){lbl.textContent='✅';setTimeout(()=>{if(lbl)lbl.textContent='💾';},1500);}
-  const data = {};
-  assets.forEach(a=>{
-    const fVal = Object.keys(a.findings).find(k=>a.findings[k])||'';
-    if(a.checks.bj || a.checks.kp || fVal || a.customFinding){
-      data[a.id] = {
-        bj: a.checks.bj||false,
-        kp: a.checks.kp||false,
-        finding: fVal,
-        customFinding: a.customFinding||'',
-        remark: a.remarks[fVal]||a.remarks['custom']||''
-      };
-    }
+// ── HELPERS ──────────────────────────────────────────────
+async function fbGet(path){
+  const r = await fetch(`${FB_URL}/${path}.json`);
+  if(!r.ok) throw new Error('FB GET failed: '+r.status);
+  return r.json();
+}
+async function fbSet(path, data){
+  const r = await fetch(`${FB_URL}/${path}.json`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
   });
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-  catch(e){}
+  if(!r.ok) throw new Error('FB SET failed: '+r.status);
+  return r.json();
+}
+async function fbUpdate(path, data){
+  const r = await fetch(`${FB_URL}/${path}.json`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  });
+  if(!r.ok) throw new Error('FB UPDATE failed');
+  return r.json();
 }
 
-function loadAuditFromStorage(){
+// ── INIT ─────────────────────────────────────────────────
+async function initSupabase(){
+  addSyncIndicator();
+  // Load from localStorage first (instant)
+  loadAuditFromStorage();
+  // Then sync from Firebase
+  await loadFromFirebase();
+  // Start polling for changes every 5s
+  startFirebasePoll();
+}
+
+// ── LOAD FROM FIREBASE ────────────────────────────────────
+async function loadFromFirebase(){
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    let count = 0;
-    Object.entries(data).forEach(([id, d])=>{
-      const a = assets.find(x=>x.id===id);
-      if(!a) return;
+    const data = await fbGet('audit');
+    if(!data){ 
+      if(dot) dot.style.background='#1a8a4a';
+      return; 
+    }
+    let count=0;
+    Object.entries(data).forEach(([id,d])=>{
+      const a=assets.find(x=>x.id===id); if(!a)return;
       a.checks.bj = d.bj||false;
       a.checks.kp = d.kp||false;
-      a.findings  = d.finding ? {[d.finding]:true} : {};
+      a.findings  = d.finding?{[d.finding]:true}:{};
       a.customFinding = d.customFinding||'';
-      const rmk = d.remark||'';
-      a.remarks = {worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
+      const rmk=d.remark||'';
+      a.remarks={worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
       count++;
     });
-    if(count>0){
-      renderAll();
-      showToast(`📱 โหลด ${count} ລາຍການ audit ຈາກ device`);
-    }
-  } catch(e){}
-}
-
-// ── GOOGLE APPS SCRIPT SYNC (optional) ───────────────────
-// If user sets up Apps Script, enable cloud sync
-let GAS_URL = localStorage.getItem('gas_url')||'';
-
-async function syncToGAS(){
-  if(!GAS_URL) return;
-  const dot = document.getElementById('sync-dot');
-  try {
-    const data = {};
-    assets.forEach(a=>{
-      const fVal=Object.keys(a.findings).find(k=>a.findings[k])||'';
-      if(a.checks.bj||a.checks.kp||fVal){
-        data[a.id]={bj:a.checks.bj,kp:a.checks.kp,finding:fVal,
-          remark:a.remarks[fVal]||''};
-      }
-    });
-    const r = await fetch(GAS_URL+'?action=save', {
-      method:'POST', body:JSON.stringify(data)
-    });
-    if(r.ok && dot) dot.style.background='#1a8a4a';
+    if(count>0){renderStats();renderTable();renderFindings();}
+    if(dot) dot.style.background='#1a8a4a';
+    if(lbl) lbl.textContent='🔥';
+    // Also save to localStorage as backup
+    saveAllAudit();
   } catch(e){
+    console.warn('Firebase load:', e.message);
     if(dot) dot.style.background='#e67e22';
+    if(lbl) lbl.textContent='📱';
   }
 }
 
-async function syncFromGAS(){
-  if(!GAS_URL) return;
+// ── SAVE TO FIREBASE ──────────────────────────────────────
+async function saveToFirebase(assetId){
+  const a=assets.find(x=>x.id===assetId); if(!a)return;
+  const fVal=Object.keys(a.findings).find(k=>a.findings[k])||'';
+  const rmk=a.remarks[fVal]||a.remarks['custom']||'';
+  const payload={
+    bj: a.checks.bj||false,
+    kp: a.checks.kp||false,
+    finding: fVal,
+    customFinding: a.customFinding||'',
+    remark: rmk,
+    updated_at: Date.now(),
+    updated_by: currentRole
+  };
   try {
-    const r = await fetch(GAS_URL+'?action=load');
-    if(!r.ok) return;
-    const data = await r.json();
+    await fbSet(`audit/${assetId}`, payload);
+    const dot=document.getElementById('sync-dot');
+    const lbl=document.getElementById('sync-label');
+    if(dot) dot.style.background='#1a8a4a';
+    if(lbl){lbl.textContent='✅';setTimeout(()=>{if(lbl)lbl.textContent='🔥';},1500);}
+  } catch(e){
+    console.warn('Firebase save:', e.message);
+    // Fallback to localStorage
+    saveAllAudit();
+  }
+}
+
+// ── POLLING (realtime-like every 5s) ─────────────────────
+function startFirebasePoll(){
+  fbPollTimer = setInterval(async()=>{
+    if(isSyncing)return;
+    isSyncing=true;
+    try{
+      const data = await fbGet('audit');
+      if(!data){isSyncing=false;return;}
+      let changed=false;
+      Object.entries(data).forEach(([id,d])=>{
+        if(!d.updated_at||d.updated_at<=lastPollTime)return;
+        if(d.updated_by===currentRole)return; // skip own updates
+        const a=assets.find(x=>x.id===id); if(!a)return;
+        a.checks.bj=d.bj||false;
+        a.checks.kp=d.kp||false;
+        a.findings=d.finding?{[d.finding]:true}:{};
+        const rmk=d.remark||'';
+        a.remarks={worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
+        changed=true;
+      });
+      lastPollTime=Date.now();
+      if(changed){
+        renderStats();renderTable();renderFindings();
+        showToast('🔥 ຂໍ້ມູນ sync ໃໝ່ຈາກຜູ້ໃຊ້ອື່ນ');
+      }
+    }catch(e){}
+    isSyncing=false;
+  },5000);
+}
+
+// ── localStorage backup ───────────────────────────────────
+const STORAGE_KEY='far_audit_data';
+function saveAllAudit(){
+  const data={};
+  assets.forEach(a=>{
+    const fVal=Object.keys(a.findings).find(k=>a.findings[k])||'';
+    if(a.checks.bj||a.checks.kp||fVal){
+      data[a.id]={bj:a.checks.bj,kp:a.checks.kp,finding:fVal,
+        customFinding:a.customFinding||'',remark:a.remarks[fVal]||''};
+    }
+  });
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}catch(e){}
+  const dot=document.getElementById('sync-dot');
+  if(dot) dot.style.background='#1a8a4a';
+}
+function loadAuditFromStorage(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
     Object.entries(data).forEach(([id,d])=>{
-      const a=assets.find(x=>x.id===id); if(!a) return;
+      const a=assets.find(x=>x.id===id); if(!a)return;
       a.checks.bj=d.bj||false; a.checks.kp=d.kp||false;
       a.findings=d.finding?{[d.finding]:true}:{};
       const rmk=d.remark||'';
       a.remarks={worn:rmk,damaged:rmk,missing:rmk,custom:rmk};
     });
-    renderAll();
-    showToast('✅ Sync ຈາກ Cloud ສຳເລັດ');
-  } catch(e){}
+  }catch(e){}
+}
+function saveAuditStatus(id){ saveToFirebase(id); saveAllAudit(); }
+
+// ── SYNC INDICATOR ────────────────────────────────────────
+function addSyncIndicator(){
+  const tr=document.getElementById('role-disp');
+  if(!tr||document.getElementById('sync-dot'))return;
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.85)';
+  wrap.innerHTML='<div id="sync-dot" style="width:9px;height:9px;border-radius:50%;background:#e67e22;flex-shrink:0;transition:background .5s"></div><span id="sync-label">🔥</span>';
+  tr.parentNode.insertBefore(wrap,tr);
 }
 
-// ── OVERRIDE AUDIT ACTIONS → save locally ────────────────
 // Audit save integrated directly into toggleCheck/setFinding/setRemark
 
 // ── INIT ─────────────────────────────────────────────────
-function initSupabase(){
-  addSyncIndicator();
-  loadAuditFromStorage();
-  if(GAS_URL) syncFromGAS();
-}
-
-function saveAuditStatus(){ saveAllAudit(); }
+// GAS removed — using Firebase
 
 // ── SYNC INDICATOR ────────────────────────────────────────
 function addSyncIndicator(){
@@ -2231,22 +2323,11 @@ function addSyncIndicator(){
   if(!tr||document.getElementById('sync-dot')) return;
   const wrap=document.createElement('div');
   wrap.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.85);cursor:pointer';
-  wrap.title='ຄລິກ setup Cloud Sync';
-  wrap.onclick=showSyncSetup;
+  
   wrap.innerHTML='<div id="sync-dot" style="width:9px;height:9px;border-radius:50%;background:#1a8a4a;flex-shrink:0"></div><span>Local</span>';
   tr.parentNode.insertBefore(wrap,tr);
 }
 
-function showSyncSetup(){
-  const cur = localStorage.getItem('gas_url')||'';
-  const url = prompt('ໃສ່ Google Apps Script URL (ຫຼື ຫວ່າງ = offline only):', cur);
-  if(url !== null){
-    localStorage.setItem('gas_url', url.trim());
-    GAS_URL = url.trim();
-    showToast(GAS_URL ? '✅ Cloud sync ຕັ້ງຄ່າແລ້ວ' : '📱 ໃຊ້ offline mode');
-    if(GAS_URL) syncFromGAS();
-  }
-}
 
 </script>
 </body>
